@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin Panel - Patel & Shah</title>
+    <link rel="stylesheet" href="css/page_css.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h2>🔐 Admin Panel - Manage Items</h2>
+
+      <div id="adminAccess" class="admin-wrapper" style="display: none">
+        <!-- Add Item Section -->
+        <div class="add-item-section">
+          <form id="addItemForm">
+            <input type="text" id="itemName" placeholder="Item Name" required />
+            <select id="itemCategory">
+              <option value="">➕ New Category...</option>
+            </select>
+            <input type="text" id="newCategoryInput" placeholder="New Category Name" />
+            <button type="submit" class="btn">➕ Add Item</button>
+          </form>
+        </div>
+
+        <!-- Excel Upload Section -->
+        <div class="excel-upload-section">
+          <label><strong>📁 Import from Excel:</strong></label>
+          <input type="file" id="excelFile" accept=".xlsx, .xls" />
+        </div>
+
+        <!-- Item List Preview -->
+        <div class="preview-section">
+          <h3>📝 Current Items</h3>
+          <ul id="previewList"></ul>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="admin-controls">
+          <button class="btn" id="clearAll">🗑️ Clear All Items</button>
+          <a class="btn" href="order.html">↩️ Back to Order Page</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const password = prompt("Enter Admin Password:");
+      const correctPassword = "3254";
+
+      const form = document.getElementById("addItemForm");
+      const list = document.getElementById("previewList");
+      const catDropdown = document.getElementById("itemCategory");
+      const newCatInput = document.getElementById("newCategoryInput");
+      let itemList = JSON.parse(localStorage.getItem("itemList") || "[]");
+
+      if (password === correctPassword) {
+        document.getElementById("adminAccess").style.display = "block";
+      } else {
+        document.body.innerHTML = "<h2 class='access-denied'>🚫 Access Denied</h2>";
+      }
+
+      function populateCategoryDropdown() {
+        catDropdown.innerHTML = `<option value="">➕ New Category...</option>`;
+        const categories = [...new Set(itemList.map(i => i.category).filter(Boolean))];
+        categories.forEach(cat => {
+          const option = document.createElement("option");
+          option.value = cat;
+          option.textContent = cat;
+          catDropdown.appendChild(option);
+        });
+      }
+
+      catDropdown.addEventListener("change", () => {
+        newCatInput.style.display = catDropdown.value === "" ? "inline-block" : "none";
+      });
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const name = document.getElementById("itemName").value.trim();
+        const category = catDropdown.value || newCatInput.value.trim() || "Uncategorized";
+        if (name) {
+          itemList.unshift({ name, category });
+          localStorage.setItem("itemList", JSON.stringify(itemList));
+          renderItems();
+          form.reset();
+          populateCategoryDropdown();
+        }
+      });
+
+      function renderItems() {
+        list.innerHTML = "";
+        if (itemList.length === 0) {
+          list.innerHTML = "<li>No items added yet.</li>";
+          return;
+        }
+
+        const categoryMap = {};
+        itemList.forEach((item, i) => {
+          const cat = item.category || "Uncategorized";
+          if (!categoryMap[cat]) categoryMap[cat] = [];
+          categoryMap[cat].push({ ...item, index: i });
+        });
+
+        Object.keys(categoryMap).forEach((category) => {
+          const wrapper = document.createElement("li");
+          wrapper.innerHTML = `<strong class="collapsible" style="cursor:pointer;">${category} ▼</strong>`;
+          const subList = document.createElement("ul");
+
+          categoryMap[category].forEach(({ name, index }) => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+              ${name}
+              <button onclick="editItem(${index})">🖊️</button>
+              <button onclick="deleteItem(${index})">🗑️</button>
+            `;
+            subList.appendChild(li);
+          });
+
+          wrapper.appendChild(subList);
+          list.appendChild(wrapper);
+
+          wrapper.querySelector(".collapsible").addEventListener("click", () => {
+            subList.style.display = subList.style.display === "none" ? "block" : "none";
+          });
+        });
+
+        populateCategoryDropdown();
+      }
+
+      function deleteItem(index) {
+        if (confirm("Delete this item?")) {
+          itemList.splice(index, 1);
+          localStorage.setItem("itemList", JSON.stringify(itemList));
+          renderItems();
+        }
+      }
+
+      function editItem(index) {
+        const newName = prompt("Update item name:", itemList[index].name);
+        if (newName) {
+          itemList[index].name = newName.trim();
+          localStorage.setItem("itemList", JSON.stringify(itemList));
+          renderItems();
+        }
+      }
+
+      document.getElementById("clearAll").addEventListener("click", () => {
+        if (confirm("Are you sure you want to delete all items?")) {
+          localStorage.removeItem("itemList");
+          itemList = [];
+          renderItems();
+        }
+      });
+
+      document.getElementById("excelFile").addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+          itemList = [];
+          let currentCategory = "Uncategorized";
+
+          rows.forEach((row) => {
+            const item = (row[0] || "").toString().trim();
+            const category = (row[1] || "").toString().trim();
+            if ((!item && !category) || item.toLowerCase().includes("item") || category.toLowerCase().includes("item")) return;
+            if (category) currentCategory = category;
+            if (item) {
+              itemList.push({ name: item, category: currentCategory });
+            }
+          });
+
+          localStorage.setItem("itemList", JSON.stringify(itemList));
+          renderItems();
+          alert("✅ Excel imported using item = col A, category = col B");
+        };
+        reader.readAsArrayBuffer(file);
+      });
+
+      renderItems();
+    </script>
+  </body>
+</html>

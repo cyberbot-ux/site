@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Order Sheet</title>
+  <link rel="stylesheet" href="css/page_css.css" />
+
+</head>
+<body>
+  <div class="container">
+    <div class="header-controls">
+      <h2>📦 Order Form</h2>
+      <a class="btn btn-sm" href="admin.html">➕ Add Item</a>
+    </div>
+
+    <div class="date-box">
+      <p><strong>Date:</strong> <span id="currentDate"></span></p>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="🔍 Search items..." />
+    </div>
+
+    <div class="table-box">
+      <table id="itemTable">
+        <thead>
+          <tr><th>#</th><th>Item</th><th>Quantity</th></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="footer-controls">
+      <button class="btn" onclick="goToSubmitPage()">➡️ Next</button>
+     
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("currentDate").textContent = new Date().toLocaleDateString();
+
+    const savedItems = JSON.parse(localStorage.getItem("itemList") || "[]");
+    const tableBody = document.getElementById("tableBody");
+    const searchInput = document.getElementById("searchInput");
+    let count = 0;
+    let lastCategory = "";
+
+    function updateTotalCount() {
+      let total = 0;
+      document.querySelectorAll(".qty").forEach(input => total += +input.value);
+      document.getElementById("itemCount").textContent = `Total Selected: ${total}`;
+    }
+
+    function createRow(itemName, itemCategory) {
+      if (itemCategory !== lastCategory) {
+        const catRow = document.createElement("tr");
+        catRow.className = "category";
+        catRow.innerHTML = `<td colspan="3">${itemCategory} <span class="arrow">▶</span></td>`;
+        catRow.addEventListener("click", () => {
+          const arrow = catRow.querySelector(".arrow");
+          const isHidden = arrow.textContent === "▶";
+          arrow.textContent = isHidden ? "▼" : "▶";
+          let next = catRow.nextSibling;
+          while (next && !next.classList.contains("category")) {
+            next.style.display = isHidden ? "" : "none";
+            next = next.nextSibling;
+          }
+        });
+        tableBody.appendChild(catRow);
+        lastCategory = itemCategory;
+      }
+
+      count++;
+      const row = document.createElement("tr");
+      row.setAttribute("data-name", itemName.toLowerCase());
+      row.innerHTML = `
+        <td>${count}</td>
+        <td>${itemName}</td>
+        <td><input type="number" class="qty" min="0" value="0"></td>`;
+      row.style.display = "none";
+      row.setAttribute("data-category", itemCategory);
+      tableBody.appendChild(row);
+    }
+
+    savedItems.forEach(item => createRow(item.name, item.category));
+    tableBody.addEventListener("input", updateTotalCount);
+
+    searchInput.addEventListener("input", () => {
+      const filter = searchInput.value.toLowerCase();
+      document.querySelectorAll("tr[data-name]").forEach(row => {
+        const name = row.getAttribute("data-name");
+        row.style.display = name.includes(filter) ? "" : "none";
+      });
+    });
+
+    function goToSubmitPage() {
+      const orders = [];
+      let currentCategory = "";
+
+      document.querySelectorAll("#itemTable tbody tr").forEach(row => {
+        if (row.classList.contains("category")) {
+          currentCategory = row.textContent.trim();
+        } else {
+          const qty = +row.querySelector(".qty").value;
+          const name = row.children[1].textContent;
+          if (qty > 0) {
+            orders.push({ name, quantity: qty, category: currentCategory });
+          }
+        }
+      });
+
+      if (orders.length === 0) return alert("Please select at least one item.");
+      localStorage.setItem("orderToSubmit", JSON.stringify(orders));
+      window.location.href = "submit.html";
+    }
+  </script>
+</body>
+</html>

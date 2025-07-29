@@ -1,0 +1,191 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f6f8;
+  color: #333;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+/* Headings */
+h2, h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+/* Button Styles */
+.btn {
+  background-color: #2196f3;
+  color: white;
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #1976d2;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 14px;
+}
+
+button:disabled,
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Table Styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  animation: fadeInTable 0.5s ease;
+}
+
+@keyframes fadeInTable {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+th, td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+thead {
+  background-color: #2196f3;
+  color: white;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+  background-color: #e3f2fd;
+  transition: background-color 0.3s ease;
+}
+
+/* Input Styles */
+input[type="text"],
+input[type="number"],
+select {
+  padding: 10px;
+  margin: 10px 0;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border 0.2s ease, background-color 0.2s ease;
+}
+
+input:focus,
+select:focus {
+  border-color: #42a5f5;
+  background-color: #fffde7;
+  outline: none;
+}
+
+input.qty {
+  width: 80px;
+}
+
+/* Category Toggle Row */
+.category {
+  background-color: #e3f2fd;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.category:hover {
+  background-color: #bbdefb;
+}
+
+/* Layout containers */
+.header-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+/* Order summary area */
+#printArea {
+  margin-bottom: 30px;
+}
+
+/* List styling in admin panel */
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+ul li {
+  margin-bottom: 10px;
+}
+
+/* Collapsible category headers in admin panel */
+.collapsible {
+  font-weight: bold;
+  display: inline-block;
+  cursor: pointer;
+  color: #2c3e50;
+}
+
+.collapsible:hover {
+  color: #1976d2;
+}
+
+.collapsible + ul {
+  margin-top: 5px;
+  padding-left: 20px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  .header-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  table {
+    font-size: 14px;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  input.qty {
+    width: 100%;
+  }
+}
