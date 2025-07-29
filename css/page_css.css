@@ -189,3 +189,60 @@ ul li {
     width: 100%;
   }
 }
+
+/* ----- RESPONSIVE STYLING ----- */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  h2 {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .header-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select {
+    width: 100% !important;
+    font-size: 16px;
+    margin: 5px 0;
+  }
+
+  table {
+    font-size: 14px;
+    word-break: break-word;
+  }
+
+  th,
+  td {
+    padding: 6px;
+  }
+
+  .btn {
+    width: 100%;
+    font-size: 16px;
+    padding: 10px;
+    margin-top: 10px;
+  }
+
+  .category {
+    font-size: 16px;
+  }
+
+  #itemCount {
+    font-size: 16px;
+    margin-top: 10px;
+  }
+
+  .header-controls a.btn {
+    width: 100%;
+    text-align: center;
+  }
+}
